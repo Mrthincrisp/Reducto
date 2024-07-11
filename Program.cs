@@ -71,7 +71,7 @@ namespace Reducto
             string greeting = "Hey, here's the Main Menu:";
 
             Console.WriteLine(greeting);
-            string choice = null;
+            string? choice = null;
             while (choice != "0")
             {
                 Console.WriteLine(@"1. View all products
@@ -94,7 +94,7 @@ namespace Reducto
                         //
                         break;
                     case "3":
-                        //
+                        DeleteProduct(products);
                         break;
                     case "4":
                         //
@@ -116,7 +116,38 @@ namespace Reducto
                     Console.ReadKey();
             }
 
+            void DeleteProduct(List<Products> products)
+            {
+                while (true)
+                {
+                    Console.WriteLine("Enter product number to delete, or press q to return.");
+                    for (int i = 0; i < products.Count; i++)
+                    {
+                        Console.WriteLine($"To delete {products[i].Name} enter {i}.");
+                    }
+                    string? input = Console.ReadLine();
 
+                    if (input == "q")
+                    {
+                        return;
+                    }
+
+                    if (int.TryParse(input, out int index) && index >= 0 && index < products.Count)
+                    {
+                        Console.WriteLine($"product {products[index].Name} has been deleted.");
+                        products.RemoveAt(index);
+                        Console.Write("press any key to continue");
+                        Console.ReadKey();
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid input. Please enter a valid number.");
+                        Console.Write("press any key to return to the main menu");
+                        Console.ReadKey();
+                    }
+                }
+            }
         }
     }
 }
