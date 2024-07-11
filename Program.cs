@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Numerics;
 using System.Xml.Linq;
 
 namespace Reducto
@@ -37,9 +38,10 @@ namespace Reducto
             List<Products> products = 
             [
                new Products("Phoenix Core Wand", 12.25m, false, type.First(t => t.Id == "wan")),
-               new Products("Dragonhide Armor", 75.50m, false, type.First(t => t.Id == "app")),
+               new Products("Boots with the fur", 75.50m, false, type.First(t => t.Id == "app")),
                new Products("Healing Potion", 8.00m, true, type.First(t => t.Id == "pot")),
-               new Products("Invisibility Cloak", 150.00m, false, type.First(t => t.Id == "enchant"))
+               new Products("Invisibility Cloak", 150.00m, false, type.First(t => t.Id == "enchant")),
+               new Products("Flying Broom", 19.99m, false, type.First(t => t.Id == "enchant"))
             ];
 
             string greeting = "Hey, here's the Main Menu:";
@@ -48,11 +50,11 @@ namespace Reducto
             string? choice = null;
             while (choice != "0")
             {
-                Console.WriteLine(@"1. View all products
-2. Add a new Product
-3. Delete a Product
-4. Update a Product
-0. Quit");
+                Console.WriteLine(@"  1. View all products
+  2. Add a new Product
+  3. Delete a Product
+  4. Update a Product
+  0. Quit");
                 choice = Console.ReadLine();
                 switch (choice)
                 {
@@ -68,14 +70,14 @@ namespace Reducto
                         AddProduct(products);
                         break;
                     case "3":
-                        DeleteProduct(products, type);
+                        DeleteProduct(products);
                         break;
                     case "4":
-                        //
+                        UpdateProduct(products);
                         break;
                     default:
                         Console.WriteLine("PLEASE MAKE A SELECTION BETWEEN 0-4");
-                        Console.Write("Press any key to continue.");
+                        Console.WriteLine("Press any key to continue.");
                         Console.ReadKey();
                         break;
                 }
@@ -84,13 +86,13 @@ namespace Reducto
             void ShowAllProducts()
             {
                 for (int i = 0; i < products.Count; i++){
-                    Console.WriteLine($"   {i + 1}. {products[i].Name} : ${products[i].Price}.");
+                    Console.WriteLine($"   {i + 1}. {products[i].Name} : ${products[i].Price} {(products[i].Sold ? "Sold out" : "In Stock")}.");
                 }
-                    Console.Write("Press any key to continue.");
+                    Console.WriteLine("Press any key to continue.");
                     Console.ReadKey();
             }
 
-            void DeleteProduct(List<Products> products, List<ProductType> type)
+            void DeleteProduct(List<Products> products)
             {
                 while (true)
                 {
@@ -110,7 +112,7 @@ namespace Reducto
                     {
                         Console.WriteLine($"product {products[index].Name} has been deleted.");
                         products.RemoveAt(index);
-                        Console.Write("press any key to continue");
+                        Console.WriteLine("press any key to continue");
                         Console.ReadKey();
                         return;
                     }
@@ -152,8 +154,91 @@ namespace Reducto
                 Products newProduct = new(name, price, sold, type[typeIndex]);
                 products.Add(newProduct);
                 Console.WriteLine($"  {newProduct.Name} was added");
-                Console.Write("  press any key to continue");
+                Console.WriteLine("  press any key to continue");
                 Console.ReadKey();
+            }
+
+            void UpdateProduct(List<Products> products)
+            {
+                Console.WriteLine("Select a product to update, or enter q, to return to the main menu:");
+                for (int i = 0; i < products.Count; i++)
+                {
+                    Console.WriteLine($"For {products[i].Name} enter {i}.");
+                }
+                string? input = Console.ReadLine();
+
+                if (input == "q")
+                {
+                    return;
+                }
+
+                if (int.TryParse(input, out int index) && index >= 0 && index < products.Count)
+                {
+                    Console.WriteLine($"Enter the new name of product: {products[index].Name}, or press enter to leave unchanged");
+                    string? newName = Console.ReadLine();
+
+                    if (string.IsNullOrEmpty(newName))
+                    {
+                        newName = products[index].Name;
+                    }
+
+                    Console.WriteLine("Enter the new price of the product:");
+                    decimal newPrice;
+                    while (!decimal.TryParse(Console.ReadLine(), out newPrice))
+                    {
+                        Console.WriteLine("that is not a valid number please enter a format of 1.23");
+                    }
+                    newPrice = Math.Round(newPrice, 2);
+
+
+                    bool newSold = false;
+                    bool inputValid = false;
+
+                    while (!inputValid)
+                    {
+                        Console.WriteLine("Is the current product Sold Out yes or no?:");
+                        string? soldInput = Console.ReadLine()?.Trim().ToLower();
+
+                        switch (soldInput)
+                        {
+                            case "yes":
+                            case "y":
+                                newSold = true;
+                                inputValid = true;
+                                break;
+                            case "no":
+                            case "n":
+                                newSold = false;
+                                inputValid = true;
+                                break;
+                            default:
+                                Console.WriteLine("Invalid response. Please enter 'yes' or 'no'.");
+                                break;
+                        }
+                    }
+
+
+                    Console.WriteLine("enter the product's type number");
+                    for (int i = 0; i < type.Count; i++)
+                    {
+                        Console.WriteLine($"   {i}: {type[i].Name}");
+                    }
+
+                    int newTypeIndex;
+                    while (!int.TryParse(Console.ReadLine(), out newTypeIndex) || newTypeIndex < 0 || newTypeIndex >= type.Count)
+                    {
+                        Console.WriteLine("Invalid input, try again.");
+                    }
+
+                    products[index].Name = newName;
+                    products[index].Price = newPrice;
+                    products[index].Sold = newSold;
+                    products[index].ProductType = type[newTypeIndex];
+
+                    Console.WriteLine($"{newName} updated");
+                    Console.WriteLine("  press any key to continue");
+                    Console.ReadKey();
+                }
             }
         }
     }
