@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Reducto;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Xml.Linq;
 
@@ -8,64 +10,36 @@ namespace Reducto
     {
         static void Main(string[] args)
         {
-            var wand = new ProductType
+            List<ProductType> type =
+                [
+             new ProductType()
             {
                 Id = "wan",
                 Name = "Wand"
-            };
-            var apparel = new ProductType
+            },
+            new ProductType()
             {
                 Id = "app",
                 Name = "Apparel"
-            };
-            var potion = new ProductType
+            },
+            new ProductType()
             {
                 Id = "pot",
                 Name = "Potion"
-            };
-            var enchant = new ProductType
+            },
+            new ProductType()
             {
                 Id = "enchant",
                 Name = "Enchanted Object"
-            };
+            }
+            ];
 
-            List<Products> products =
+            List<Products> products = 
             [
-                new Products()
-                {
-                    Name = "Pheonix Core Wand",
-                    Price = 12.25m,
-                    Sold = false,
-                    ProductType = wand
-                },
-                new Products()
-                {
-                    Name = "Blue Cloak",
-                    Price = 25.05m,
-                    Sold = false,
-                    ProductType = apparel
-                },
-                new Products()
-                {
-                    Name = "Love Potion",
-                    Price = 30.27m,
-                    Sold = false,
-                    ProductType = potion
-                },
-                new Products()
-                {
-                    Name = "Boots with the fur",
-                    Price = 49.99m,
-                    Sold = false,
-                    ProductType = apparel
-                },
-                new Products()
-                {
-                    Name = "Flying Broom",
-                    Price = 14.99m,
-                    Sold = true,
-                    ProductType = enchant
-                }
+               new Products("Phoenix Core Wand", 12.25m, false, type.First(t => t.Id == "wan")),
+               new Products("Dragonhide Armor", 75.50m, false, type.First(t => t.Id == "app")),
+               new Products("Healing Potion", 8.00m, true, type.First(t => t.Id == "pot")),
+               new Products("Invisibility Cloak", 150.00m, false, type.First(t => t.Id == "enchant"))
             ];
 
             string greeting = "Hey, here's the Main Menu:";
@@ -91,10 +65,10 @@ namespace Reducto
                         ShowAllProducts();
                         break;
                     case "2":
-                        //
+                        AddProduct(products);
                         break;
                     case "3":
-                        DeleteProduct(products);
+                        DeleteProduct(products, type);
                         break;
                     case "4":
                         //
@@ -110,13 +84,13 @@ namespace Reducto
             void ShowAllProducts()
             {
                 for (int i = 0; i < products.Count; i++){
-                    Console.WriteLine($"{i + 1}. {products[i].Name} : ${products[i].Price}.");
+                    Console.WriteLine($"   {i + 1}. {products[i].Name} : ${products[i].Price}.");
                 }
                     Console.Write("Press any key to continue.");
                     Console.ReadKey();
             }
 
-            void DeleteProduct(List<Products> products)
+            void DeleteProduct(List<Products> products, List<ProductType> type)
             {
                 while (true)
                 {
@@ -148,6 +122,43 @@ namespace Reducto
                     }
                 }
             }
+
+            void AddProduct(List<Products> products)
+            {
+                Console.WriteLine("Enter Product details: Product's name?");
+                string? name = Console.ReadLine();
+
+                Console.WriteLine("Enter Product details: Product's Price?");
+                decimal price;
+                while (!decimal.TryParse(Console.ReadLine(), out price)) 
+                {
+                    Console.WriteLine("that is not a valid number please enter a format of 1.23");
+                }
+
+                bool sold = false;
+
+                Console.WriteLine("enter the type's number");
+                for (int i = 0; i < type.Count; i++)
+                {
+                    Console.WriteLine($@"   {i}: {type[i].Name}");
+                }
+
+                int typeIndex;
+                while (!int.TryParse(Console.ReadLine(), out typeIndex) || typeIndex < 0 || typeIndex >= type.Count)
+                {
+                    Console.WriteLine("Invalid input, try again.");
+                }
+
+                Products newProduct = new(name, price, sold, type[typeIndex]);
+                products.Add(newProduct);
+                Console.WriteLine($"  {newProduct.Name} was added");
+                Console.Write("  press any key to continue");
+                Console.ReadKey();
+            }
         }
     }
 }
+
+
+
+
